@@ -27,7 +27,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 worker.name,
                 worker.first_surname,
                 worker.second_surname,
-                company.*
+                company.comercial_name,
+                company.fiscal_name,
+                company.id
              FROM 
                 worker
              LEFT JOIN 
