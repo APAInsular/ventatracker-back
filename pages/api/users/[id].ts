@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 worker.second_surname,
                 company.comercial_name,
                 company.fiscal_name,
-                company.id
+                worker.company_id
              FROM 
                 worker
              LEFT JOIN 
