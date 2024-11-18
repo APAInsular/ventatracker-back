@@ -43,8 +43,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(404).json({ error: 'Usuario no encontrado' });
         }
 
+        const user = {
+            id: rows[0].id,
+            name: rows[0].name,
+            first_surname: rows[0].first_surname,
+            second_surname: rows[0].second_surname,
+            company: {
+                company_id: rows[0].company_id,
+                comercial_name: rows[0].comercial_name,
+                fiscal_name: rows[0].fiscal_name
+            }
+        };
+
         // Devuelve los datos del usuario
-        res.status(200).json(rows[0]);
+        res.status(200).json(user);
     } catch (error: unknown) {
         console.error('Error al obtener el usuario:', error);
         res.status(500).json({ error: 'Error al obtener los datos del usuario' });
