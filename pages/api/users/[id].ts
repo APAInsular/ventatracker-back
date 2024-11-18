@@ -21,8 +21,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Realiza la consulta a la base de datos para obtener los datos del usuario
-        const [rows]: [RowDataPacket[], any] = await db.query('SELECT * FROM worker WHERE id = ?', [id]);
-
+        const [rows]: [RowDataPacket[], any] = await db.query(
+            `SELECT 
+                worker.id,
+                worker.name,
+                worker.first_surname,
+                worker.second_surname,
+                company.*
+             FROM 
+                worker
+             LEFT JOIN 
+                company ON worker.company_id = company.id
+             WHERE 
+                worker.id = ?`,
+            [id]
+        );
         // Verifica si se encontró un usuario con ese ID
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
