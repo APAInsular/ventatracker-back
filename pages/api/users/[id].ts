@@ -1,8 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import db from '../../../lib/db'; // Importa tu conexión a la base de datos
 import { RowDataPacket } from 'mysql2'; // Importa el tipo para manejar los resultados de la consulta
+import corsMiddleware from '../../../middlewares/corsMiddleware'; // Importa el middleware de CORS
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+
+    await corsMiddleware(req, res);
+
     if (req.method !== 'GET') {
         res.setHeader('Allow', ['GET']);
         return res.status(405).end(`Method ${req.method} Not Allowed`);
