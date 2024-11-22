@@ -1,12 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import db from '../../../lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2'; // Importa tipos para las respuestas de consultas
+import corsMiddleware from '../../../middlewares/corsMiddleware'; // Importa el middleware de CORS
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+
+    await corsMiddleware(req, res);
+
     switch (req.method) {
         case 'GET':
             try {
-                const [rows]: [RowDataPacket[], any] = await db.query('SELECT * FROM products');
+                const [rows]: [RowDataPacket[], any] = await db.query('SELECT * FROM product');
                 res.status(200).json(rows);
             } catch (error: unknown) {
                 console.error('Error al obtener los productos:', error);
@@ -16,17 +20,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'POST':
             try {
-                const { name, price, description } = req.body;
+                const {name, price} = req.body;
 
                 // Verifica que los datos requeridos estén presentes
-                if (!name || !price || !description) {
+                if (!name || !price) {
                     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
                 }
 
                 // Inserta el producto en la base de datos
                 const [result]: [ResultSetHeader, any] = await db.query(
-                    'INSERT INTO products (name, price, description) VALUES (?, ?, ?)', 
-                    [name, price, description]
+                    'INSERT INTO product (name, price) VALUES (?, ?)', 
+                    [name, price]
                 );
 
                 res.status(201).json({ message: 'Producto creado con éxito', productId: result.insertId });

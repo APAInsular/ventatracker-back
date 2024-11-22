@@ -3,8 +3,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 // Inicializa el middleware de CORS
 const cors = Cors({
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
-    origin: ['http://localhost:3001'],        // Origen permitido (React frontend)
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Métodos permitidos
+    origin: ['http://localhost:3001'],                   // Origen permitido
+    allowedHeaders: ['Content-Type', 'Authorization'],   // Cabeceras permitidas
 });
 
 // Helper para ejecutar el middleware
