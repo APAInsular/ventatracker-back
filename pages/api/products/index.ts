@@ -20,17 +20,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'POST':
             try {
-                const {name, price} = req.body;
+                const { name, price, code, brand_id } = req.body;
 
                 // Verifica que los datos requeridos estén presentes
-                if (!name || !price) {
+                if (!name || !price || !code) {
                     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
                 }
 
                 // Inserta el producto en la base de datos
                 const [result]: [ResultSetHeader, any] = await db.query(
-                    'INSERT INTO product (name, price) VALUES (?, ?)', 
-                    [name, price]
+                    'INSERT INTO product (name, price, code, brand_id) VALUES (?, ?,?,?)',
+                    [name, price, code, brand_id]
                 );
 
                 res.status(201).json({ message: 'Producto creado con éxito', productId: result.insertId });
@@ -42,13 +42,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'PUT':
             try {
-                const { id, name, price, description } = req.body;
+                const { id, name, price, code, brand_id } = req.body;
                 if (!id) {
                     return res.status(400).json({ error: 'Se requiere un ID para actualizar el producto' });
                 }
 
-                await db.query('UPDATE products SET name = ?, price = ?, description = ? WHERE id = ?', 
-                    [name, price, description, id]
+                await db.query('UPDATE product SET name = ?, price = ?, code = ?,brand_id=? WHERE id = ?',
+                    [name, price, code, id,brand_id]
                 );
                 res.status(200).json({ message: 'Producto actualizado con éxito' });
             } catch (error: unknown) {

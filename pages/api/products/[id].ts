@@ -43,17 +43,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             break;
 
         case 'PUT': // Editar un producto específico
+        console.log(req.body)
             try {
-                const { name, price } = req.body;
+                const { name, price, code,brand_id } = req.body;
 
                 // Verifica que los datos requeridos estén presentes
-                if (!name || !price) {
+                if (!name || !price || !code || !brand_id) {
                     return res.status(400).json({ error: 'Los campos name y price son obligatorios' });
                 }
 
                 const [result]: [ResultSetHeader, any] = await db.query(
-                    'UPDATE product SET name = ?, price = ? WHERE id = ?',
-                    [name, price, id]
+                    'UPDATE product SET name = ?, price = ?, code = ?,brand_id=? WHERE id = ?',
+                    [name, price,code,brand_id, id]
                 );
 
                 if (result.affectedRows === 0) {
