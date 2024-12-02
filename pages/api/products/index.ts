@@ -10,7 +10,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     switch (req.method) {
         case 'GET':
             try {
-                const [rows]: [RowDataPacket[], any] = await db.query('SELECT * FROM product');
+                const { workerId } = req.query; // Asumimos que el ID del trabajador se pasa como parámetro de la consulta
+
+                if (!workerId) {
+                    return res.status(400).json({ error: 'Se requiere un worker_id para obtener los productos' });
+                }
+
+                // Obtener el ID de la empresa del trabajador
+                const [worker]: [RowDataPacket[], any] = await db.query(
+                    'SELECT company_id FROM worker WHERE id = ?',
+                    [workerId]
+                );
+
+                if (!worker || !worker[0].company_id) {
+                    return res.status(404).json({ error: 'Trabajador no encontrado o no tiene empresa asociada' });
+                }
+
+                const empresa_id = worker[0].company_id;
+
+                // Obtener los productos de la empresa
+                const [rows]: [RowDataPacket[], any] = await db.query(
+                    'SELECT * FROM product WHERE company_id = ?',
+                    [empresa_id]
+                );
+
                 res.status(200).json(rows);
             } catch (error: unknown) {
                 console.error('Error al obtener los productos:', error);
@@ -20,17 +43,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'POST':
             try {
-                const { name, price, code, brand_id } = req.body;
+                const { name, price, code, brand_id, empresa_id } = req.body;
 
                 // Verifica que los datos requeridos estén presentes
-                if (!name || !price || !code) {
+                if (!name || !price || !code || !empresa_id) {
                     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
                 }
 
                 // Inserta el producto en la base de datos
                 const [result]: [ResultSetHeader, any] = await db.query(
-                    'INSERT INTO product (name, price, code, brand_id) VALUES (?, ?,?,?)',
-                    [name, price, code, brand_id]
+                    'INSERT INTO product (name, price, code, brand_id, empresa_id) VALUES (?, ?, ?, ?, ?)',
+                    [name, price, code, brand_id, empresa_id]
                 );
 
                 res.status(201).json({ message: 'Producto creado con éxito', productId: result.insertId });
@@ -42,13 +65,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'PUT':
             try {
-                const { id, name, price, code, brand_id } = req.body;
+                const { id, name, price, code, brand_id, empresa_id } = req.body;
                 if (!id) {
                     return res.status(400).json({ error: 'Se requiere un ID para actualizar el producto' });
                 }
 
-                await db.query('UPDATE product SET name = ?, price = ?, code = ?,brand_id=? WHERE id = ?',
-                    [name, price, code, id,brand_id]
+                await db.query(
+                    'UPDATE product SET name = ?, price = ?, code = ?, brand_id = ?, empresa_id = ? WHERE id = ?',
+                    [name, price, code, brand_id, empresa_id, id]
                 );
                 res.status(200).json({ message: 'Producto actualizado con éxito' });
             } catch (error: unknown) {
